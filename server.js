@@ -19,32 +19,26 @@ app.get('/', (req, res) => {
 
 app.post('/', (req, res) => {
     const { city } = req.body;
-    let apiUrl = `http://maps.openweathermap.org/maps/2.0/weather?q=${city}&appid=${URIKEY}&units=metric`;
+    let apiUrl = `http://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${URIKEY}&units=metric`;
     console.log(city)
-    return axios.post(`${apiUrl}`).then((response) => {
-        let weather = JSON.parse(response.data)
-        if(weather === undefined) {
-            res.render('index', { weather: null, error: 'Error, please try again' })
-        } else {
-            let weatherText = `It's ${weather.main.temp} degrees with ${weather.weather[0].main} in ${weather.name}!`;
-            res.render('index', { weather: weatherText, error: null });
-            console.log(`Data: ${response.data}`)
+    request(apiUrl, (error, docs, body) => {
+        body = JSON.parse(body)
+        console.log(body)
+        if(error && docs.statusCode !== 200) {
+            throw error;
         }
+        let forcast = "For city "+city+', country '+country;
+
+        const weatherData = {
+            weather: body.main,
+            description: body.description,
+            icon: body.icon,
+            main: body.main.temp,
+            country: (body.sys.country) ? body.sys.country : '',
+        }
+
+        res.render('index', { body: body, forecast: forcast, weatherData: weatherData });
     })
-    // request(apiUrl, (error, docs, body) => {
-    //     // if(error) {
-    //     //     res.render('error', { error: '' })
-    //     // }
-    //     body = JSON.parse(body)
-    //     console.log(body)
-    //     if(error && docs.statusCode !== 200) {
-    //         throw error;
-    //     }
-    //     let country = (body.sys.country) ? body.sys.country : '';
-    //     let forcast = "For city "+city+', country '+country;
-    //
-    //     res.render('index', {body: body, forecast: forcast });
-    // })
 })
 
 app.listen(PORT, () => {
