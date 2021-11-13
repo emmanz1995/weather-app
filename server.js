@@ -17,19 +17,19 @@ app.get('/', (req, res) => {
     res.render('index', { weather: null, error: null })
 })
 
-app.post('/', (req, res, input) => {
+app.post('/', (req, res) => {
     const { city } = req.body;
     let apiUrl = `http://maps.openweathermap.org/maps/2.0/weather?q=${city}&appid=${URIKEY}&units=metric`;
     console.log(city)
     return axios.post(`${apiUrl}`).then((response) => {
         let weather = JSON.parse(response.data)
-        // if(weather === undefined) {
-        //     res.render('index', { weather: null, error: 'Error, please try again' })
-        // } else {
+        if(weather === undefined) {
+            res.render('index', { weather: null, error: 'Error, please try again' })
+        } else {
             let weatherText = `It's ${weather.main.temp} degrees with ${weather.weather[0].main} in ${weather.name}!`;
             res.render('index', { weather: weatherText, error: null });
             console.log(`Data: ${response.data}`)
-        // }
+        }
     })
     // request(apiUrl, (error, docs, body) => {
     //     // if(error) {
